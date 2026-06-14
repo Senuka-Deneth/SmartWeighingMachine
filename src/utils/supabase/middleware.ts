@@ -37,6 +37,10 @@ export async function updateSession(request: NextRequest) {
   const isLoginPage = pathname === "/login";
   const isApiRoute = pathname.startsWith("/api/");
 
+  if (user && isLoginPage) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   if (!user && !isLoginPage && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

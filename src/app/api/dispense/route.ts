@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { sendLowStockPushNotifications } from "@/utils/send-low-stock-push";
 import type { Compartment } from "@/types/database";
 
 interface DispenseRequestBody {
@@ -109,6 +110,16 @@ export async function POST(request: Request) {
 
   if (warning) {
     response.warning = warning;
+  }
+
+  if (lowStockAlert) {
+    void sendLowStockPushNotifications(
+      admin,
+      row.product_name,
+      newStock
+    ).catch((err) => {
+      console.error("Low stock push notification failed:", err);
+    });
   }
 
   return NextResponse.json(response);

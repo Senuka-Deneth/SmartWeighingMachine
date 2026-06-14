@@ -11,6 +11,19 @@ interface DashboardClientProps {
   initialCompartments: Compartment[];
 }
 
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; i++) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
 export default function DashboardClient({
   machine,
   initialCompartments,
@@ -18,6 +31,20 @@ export default function DashboardClient({
   const router = useRouter();
   const [compartments, setCompartments] =
     useState<Compartment[]>(initialCompartments);
+  const [showAlertBanner, setShowAlertBanner] = useState(false);
+  const [alertsEnabled, setAlertsEnabled] = useState(false);
+  const [enablingAlerts, setEnablingAlerts] = useState(false);
+  const [alertError, setAlertError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      return;
+    }
+
+    if (Notification.permission === "default") {
+      setShowAlertBanner(true);
+    }
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -45,6 +72,56 @@ export default function DashboardClient({
       supabase.removeChannel(channel);
     };
   }, [machine.id]);
+
+  async function handleEnableAlerts() {
+    setAlertError(null);
+    setEnablingAlerts(true);
+
+    try {
+      const permission = await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        setShowAlertBanner(false);
+        return;
+      }
+
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidPublicKey) {
+        throw new Error("Push notifications are not configured.");
+      }
+
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          vapidPublicKey
+        ) as BufferSource,
+      });
+
+      const subscriptionJson = subscription.toJSON();
+      const response = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscriptionJson),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? "Failed to enable alerts.");
+      }
+
+      setShowAlertBanner(false);
+      setAlertsEnabled(true);
+    } catch (err) {
+      setAlertError(
+        err instanceof Error ? err.message : "Failed to enable alerts."
+      );
+    } finally {
+      setEnablingAlerts(false);
+    }
+  }
 
   async function handleLogout() {
     const supabase = createClient();
@@ -88,6 +165,44 @@ export default function DashboardClient({
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        {showAlertBanner && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-sm text-amber-900">
+              Enable low-stock alerts to get notified instantly
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleEnableAlerts}
+                disabled={enablingAlerts}
+                className="rounded-md bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+              >
+                {enablingAlerts ? "Enabling…" : "Enable"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAlertBanner(false)}
+                className="rounded-md px-2 py-1.5 text-sm text-amber-800 hover:bg-amber-100"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
+        {alertsEnabled && (
+          <p className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            Alerts enabled
+          </p>
+        )}
+
+        {alertError && (
+          <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {alertError}
+          </p>
+        )}
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {compartments.map((compartment) => (
             <CompartmentCard key={compartment.id} compartment={compartment} />

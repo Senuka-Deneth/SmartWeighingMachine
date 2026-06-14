@@ -45,6 +45,19 @@ function formatRelativeTime(iso: string): string {
   return years === 1 ? "1 year ago" : `${years} years ago`;
 }
 
+function RelativeTime({ iso }: { iso: string }) {
+  const [relative, setRelative] = useState<string | null>(null);
+
+  useEffect(() => {
+    const update = () => setRelative(formatRelativeTime(iso));
+    update();
+    const interval = setInterval(update, 60_000);
+    return () => clearInterval(interval);
+  }, [iso]);
+
+  return <>{relative ?? formatAbsoluteTime(iso)}</>;
+}
+
 export default function CompartmentDetailClient({
   compartment: initialCompartment,
   initialDispenseLogs,
@@ -256,7 +269,7 @@ export default function CompartmentDetailClient({
           </div>
 
           <p className="mt-4 text-sm text-gray-500">
-            Last updated {formatRelativeTime(compartment.updated_at)}
+            Last updated <RelativeTime iso={compartment.updated_at} />
           </p>
         </section>
 
@@ -400,7 +413,7 @@ export default function CompartmentDetailClient({
                         className="whitespace-nowrap px-4 py-3 text-gray-900"
                         title={formatAbsoluteTime(log.created_at)}
                       >
-                        {formatRelativeTime(log.created_at)}
+                        <RelativeTime iso={log.created_at} />
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-gray-900">
                         {formatStock(Number(log.amount))} kg
@@ -448,7 +461,7 @@ export default function CompartmentDetailClient({
                         className="whitespace-nowrap px-4 py-3 text-gray-900"
                         title={formatAbsoluteTime(log.created_at)}
                       >
-                        {formatRelativeTime(log.created_at)}
+                        <RelativeTime iso={log.created_at} />
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-gray-900">
                         {formatStock(Number(log.stock_before))} kg
