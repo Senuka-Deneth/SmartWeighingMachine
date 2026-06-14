@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CompartmentDetailClient from "@/components/CompartmentDetailClient";
-import { createClient } from "@/utils/supabase/server";
+import { requireAuth } from "@/utils/supabase/require-auth";
 import type { Compartment, DispenseLog, RefillLog } from "@/types/database";
 
 interface CompartmentDetailPageProps {
@@ -11,7 +11,7 @@ interface CompartmentDetailPageProps {
 export default async function CompartmentDetailPage({
   params,
 }: CompartmentDetailPageProps) {
-  const supabase = createClient();
+  const { supabase } = await requireAuth();
 
   const { data: compartment, error: compartmentError } = await supabase
     .from("compartments")
