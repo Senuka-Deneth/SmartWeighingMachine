@@ -19,7 +19,7 @@ Copy the `api_key` value from the result.
 ```bash
 curl -X POST http://localhost:3000/api/dispense \
   -H "Content-Type: application/json" \
-  -d '{"api_key": "PASTE_API_KEY_HERE", "amount": 1}'
+  -d '{"api_key": "ec397016-99b0-44ed-a027-2ebb2a8fb91d", "amount": 1}'
 ```
 
 **Expected response (200):**
