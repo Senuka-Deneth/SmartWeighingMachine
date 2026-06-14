@@ -1,23 +1,46 @@
+import DashboardClient from "./DashboardClient";
 import { createClient } from "@/utils/supabase/server";
-import LogoutButton from "./logout-button";
+import type { Compartment, Machine } from "@/types/database";
 
 export default async function DashboardPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  const { data: machine, error: machineError } = await supabase
+    .from("machines")
+    .select("*")
+    .eq("machine_number", 1)
+    .single();
+
+  if (machineError || !machine) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <p className="text-sm text-red-600">
+          Failed to load machine data. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  const { data: compartments, error: compartmentsError } = await supabase
+    .from("compartments")
+    .select("*")
+    .eq("machine_id", machine.id)
+    .order("slot_number", { ascending: true });
+
+  if (compartmentsError || !compartments) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <p className="text-sm text-red-600">
+          Failed to load compartment data. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-lg rounded-lg border border-gray-200 bg-white p-8 shadow-sm text-center">
-        <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-          Dashboard - Coming in next step
-        </h1>
-        {user?.email && (
-          <p className="mb-6 text-sm text-gray-500">Signed in as {user.email}</p>
-        )}
-        <LogoutButton />
-      </div>
-    </div>
+    <DashboardClient
+      machine={machine as Machine}
+      initialCompartments={compartments as Compartment[]}
+    />
   );
 }
