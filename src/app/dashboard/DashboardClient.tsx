@@ -130,25 +130,13 @@ export default function DashboardClient({
     router.refresh();
   }
 
-  const isOnline = machine.status === "online";
-
   return (
     <div className="page-shell">
-      <header className="border-b border-stone-200 bg-white">
+      <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-stone-900 sm:text-2xl">
-              Dashboard
-            </h1>
-            <span className="badge">
-              <span
-                className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
-                  isOnline ? "bg-stone-600" : "bg-stone-300"
-                }`}
-              />
-              {isOnline ? "Online" : "Offline"}
-            </span>
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            Dashboard
+          </h1>
           <button onClick={handleLogout} className="btn-secondary shrink-0">
             Sign out
           </button>
@@ -157,8 +145,8 @@ export default function DashboardClient({
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         {showAlertBanner && (
-          <div className="card mb-6 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <p className="text-sm text-stone-600">
+          <div className="banner-info mb-6 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <p className="text-sm text-palette-primary">
               Enable low-stock alerts to get notified when stock runs low
             </p>
             <div className="flex items-center gap-2">
@@ -183,18 +171,18 @@ export default function DashboardClient({
         )}
 
         {alertsEnabled && (
-          <p className="card mb-6 px-4 py-3 text-sm text-stone-600">
+          <p className="banner-success mb-6 px-4 py-3 text-sm text-palette-success">
             Low-stock alerts are enabled for this device
           </p>
         )}
 
         {alertError && (
-          <p className="card mb-6 px-4 py-3 text-sm text-stone-700">
+          <p className="banner-warning mb-6 px-4 py-3 text-sm text-palette-warning">
             {alertError}
           </p>
         )}
 
-        <p className="mb-6 text-sm text-stone-500">
+        <p className="mb-6 text-sm text-muted">
           Machine #{machine.machine_number} — {compartments.filter((c) => c.status === "active").length} active slot{compartments.filter((c) => c.status === "active").length !== 1 ? "s" : ""}
         </p>
 

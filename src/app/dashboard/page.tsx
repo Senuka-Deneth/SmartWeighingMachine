@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
     return (
       <div className="page-shell flex items-center justify-center px-4">
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-muted">
           Failed to load machine data. {detail}
         </p>
       </div>
@@ -30,11 +30,11 @@ export default async function DashboardPage() {
     return (
       <div className="page-shell flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <p className="text-sm text-stone-600">
+          <p className="text-sm text-muted">
             No machine found. Run the seed migration to set up machine data.
           </p>
-          <p className="mt-2 text-xs text-stone-500">
-            Execute <code className="rounded bg-stone-100 px-1">supabase/migrations/002_seed_data.sql</code>{" "}
+          <p className="mt-2 text-xs text-muted">
+            Execute <code className="rounded bg-palette-primary-light px-1 text-palette-primary">supabase/migrations/002_seed_data.sql</code>{" "}
             in the Supabase SQL editor.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
 
     return (
       <div className="page-shell flex items-center justify-center px-4">
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-muted">
           Failed to load compartment data. {detail}
         </p>
       </div>

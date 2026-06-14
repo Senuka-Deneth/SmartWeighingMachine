@@ -13,12 +13,12 @@ function formatStock(value: number): string {
 export default function CompartmentCard({ compartment }: CompartmentCardProps) {
   if (compartment.status === "inactive") {
     return (
-      <div className="card flex min-h-[200px] flex-col items-center justify-center border-dashed p-6 opacity-70">
-        <h2 className="text-base font-medium text-stone-500">
+      <div className="card flex min-h-[200px] flex-col items-center justify-center border-dashed border-palette-accent bg-palette-accent-light p-6 opacity-90">
+        <h2 className="text-base font-medium text-muted">
           Slot {compartment.slot_number}
         </h2>
-        <p className="mt-3 text-sm text-stone-400">Not configured</p>
-        <p className="mt-1 text-xs text-stone-400">Awaiting hardware setup</p>
+        <p className="mt-3 text-sm text-muted">Not configured</p>
+        <p className="mt-1 text-xs text-muted">Awaiting hardware setup</p>
       </div>
     );
   }
@@ -35,41 +35,39 @@ export default function CompartmentCard({ compartment }: CompartmentCardProps) {
   return (
     <Link
       href={`/dashboard/compartment/${compartment.id}`}
-      className="card group block p-6 transition-colors hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-200 focus:ring-offset-2"
+      className="card group block p-6 transition-colors hover:border-palette-primary focus:outline-none focus:ring-2 focus:ring-palette-primary-light focus:ring-offset-2"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-palette-primary">
             Slot {compartment.slot_number}
           </p>
-          <h2 className="mt-1 text-lg font-semibold text-stone-900">
+          <h2 className="mt-1 text-lg font-semibold text-foreground">
             {compartment.product_name}
           </h2>
         </div>
         {isLowStock && (
-          <span className="badge-attention shrink-0">Low stock</span>
+          <span className="badge-warning shrink-0">Low stock</span>
         )}
       </div>
 
-      <p className="mb-4 text-3xl font-semibold tracking-tight text-stone-900">
+      <p className="mb-4 text-3xl font-semibold tracking-tight text-foreground">
         {formatStock(currentStock)}
-        <span className="text-base font-normal text-stone-400"> kg</span>
-        <span className="text-sm font-normal text-stone-400">
+        <span className="text-base font-normal text-muted"> kg</span>
+        <span className="text-sm font-normal text-muted">
           {" "}
           / {formatStock(totalCapacity)} kg
         </span>
       </p>
 
-      <div className="mb-5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
+      <div className="progress-track mb-5">
         <div
-          className={`h-full rounded-full transition-all duration-300 ${
-            isLowStock ? "bg-stone-500" : "bg-stone-700"
-          }`}
+          className={isLowStock ? "progress-fill-warning" : "progress-fill-success"}
           style={{ width: `${fillPercent}%` }}
         />
       </div>
 
-      <span className="text-sm font-medium text-stone-500 transition-colors group-hover:text-stone-900">
+      <span className="text-sm font-medium text-palette-primary transition-colors group-hover:text-palette-primary-hover">
         View details →
       </span>
     </Link>

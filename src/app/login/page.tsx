@@ -23,13 +23,16 @@ export default function LoginPage() {
     <div className="page-shell flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="text-sm font-medium text-stone-500 hover:text-stone-700">
+          <Link
+            href="/"
+            className="text-sm font-medium text-palette-primary hover:text-palette-primary-hover"
+          >
             Smart Stock Monitor
           </Link>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-stone-900">
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground">
             Welcome back
           </h1>
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-muted">
             Sign in to manage your dispensing machine stock
           </p>
         </div>
@@ -39,7 +42,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-stone-700"
+                className="mb-1.5 block text-sm font-medium text-muted"
               >
                 Email
               </label>
@@ -57,7 +60,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-stone-700"
+                className="mb-1.5 block text-sm font-medium text-muted"
               >
                 Password
               </label>
@@ -72,7 +75,7 @@ export default function LoginPage() {
             </div>
 
             {state.error && (
-              <p className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700">
+              <p className="banner-warning px-4 py-3 text-sm text-palette-warning">
                 {state.error}
               </p>
             )}
@@ -80,9 +83,12 @@ export default function LoginPage() {
             <SubmitButton />
           </form>
 
-          <p className="mt-6 text-center text-sm text-stone-500">
+          <p className="mt-6 text-center text-sm text-muted">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-medium text-stone-700 hover:text-stone-900">
+            <Link
+              href="/signup"
+              className="font-medium text-palette-primary hover:text-palette-primary-hover"
+            >
               Sign up
             </Link>
           </p>

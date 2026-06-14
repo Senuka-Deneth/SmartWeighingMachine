@@ -26,7 +26,7 @@ export default async function CompartmentDetailPage({
   if (compartment.status === "inactive") {
     return (
       <div className="page-shell flex flex-col items-center justify-center px-4">
-        <p className="text-lg font-medium text-stone-700">
+        <p className="text-lg font-medium text-muted">
           This compartment is not configured
         </p>
         <Link href="/dashboard" className="link-subtle mt-6">
