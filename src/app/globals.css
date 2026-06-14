@@ -3,21 +3,56 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --muted: #78716c;
+  --border: #e7e5e4;
+  --surface: #ffffff;
+  --accent: #44403c;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-stone-50 text-stone-900;
+  }
+
+  .card {
+    @apply rounded-2xl border border-stone-200 bg-white;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-2.5 text-stone-900 transition-colors placeholder:text-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-200;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-stone-50 transition-colors hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-stone-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900;
+  }
+
+  .link-subtle {
+    @apply text-sm font-medium text-stone-600 underline-offset-4 transition-colors hover:text-stone-900 hover:underline;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-xs font-medium text-stone-600;
+  }
+
+  .badge-attention {
+    @apply inline-flex items-center rounded-full border border-stone-300 bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700;
+  }
 }
 
 @layer utilities {

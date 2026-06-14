@@ -62,6 +62,14 @@ export async function POST(request: Request) {
 
   const stockBefore = Number(row.current_stock);
   const stockAfter = Number(row.total_capacity);
+
+  if (stockBefore >= stockAfter) {
+    return NextResponse.json(
+      { error: "Compartment is already at full capacity" },
+      { status: 409 }
+    );
+  }
+
   const now = new Date().toISOString();
 
   const { error: updateError } = await admin
@@ -76,13 +84,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error: logError } = await admin.from("refill_logs").insert({
-    compartment_id: row.id,
-    refilled_by: user.id,
-    stock_before: stockBefore,
-  });
+  const { data: refillLog, error: logError } = await admin
+    .from("refill_logs")
+    .insert({
+      compartment_id: row.id,
+      refilled_by: user.id,
+      stock_before: stockBefore,
+    })
+    .select()
+    .single();
 
-  if (logError) {
+  if (logError || !refillLog) {
     return NextResponse.json(
       { error: "Failed to record refill log" },
       { status: 500 }
@@ -94,5 +106,7 @@ export async function POST(request: Request) {
     compartment_id: row.id,
     stock_before: stockBefore,
     stock_after: stockAfter,
+    updated_at: now,
+    refill_log: refillLog,
   });
 }

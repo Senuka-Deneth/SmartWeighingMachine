@@ -18,8 +18,8 @@ export default async function DashboardPage() {
         : "Please try again later.";
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <p className="text-sm text-red-600">
+      <div className="page-shell flex items-center justify-center px-4">
+        <p className="text-sm text-stone-600">
           Failed to load machine data. {detail}
         </p>
       </div>
@@ -28,13 +28,13 @@ export default async function DashboardPage() {
 
   if (!machine) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="page-shell flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-stone-600">
             No machine found. Run the seed migration to set up machine data.
           </p>
-          <p className="mt-2 text-xs text-gray-500">
-            Execute <code className="rounded bg-gray-100 px-1">supabase/migrations/002_seed_data.sql</code>{" "}
+          <p className="mt-2 text-xs text-stone-500">
+            Execute <code className="rounded bg-stone-100 px-1">supabase/migrations/002_seed_data.sql</code>{" "}
             in the Supabase SQL editor.
           </p>
         </div>
@@ -55,8 +55,8 @@ export default async function DashboardPage() {
         : "Please try again later.";
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <p className="text-sm text-red-600">
+      <div className="page-shell flex items-center justify-center px-4">
+        <p className="text-sm text-stone-600">
           Failed to load compartment data. {detail}
         </p>
       </div>

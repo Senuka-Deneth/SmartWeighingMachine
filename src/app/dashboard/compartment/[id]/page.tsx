@@ -25,15 +25,12 @@ export default async function CompartmentDetailPage({
 
   if (compartment.status === "inactive") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
-        <p className="text-lg font-medium text-gray-700">
+      <div className="page-shell flex flex-col items-center justify-center px-4">
+        <p className="text-lg font-medium text-stone-700">
           This compartment is not configured
         </p>
-        <Link
-          href="/dashboard"
-          className="mt-6 text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← Back to Dashboard
+        <Link href="/dashboard" className="link-subtle mt-6">
+          ← Back to dashboard
         </Link>
       </div>
     );
