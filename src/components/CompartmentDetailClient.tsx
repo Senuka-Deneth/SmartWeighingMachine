@@ -65,7 +65,7 @@ export default function CompartmentDetailClient({
 }: CompartmentDetailClientProps) {
   const [compartment, setCompartment] = useState(initialCompartment);
   const [dispenseLogs, setDispenseLogs] = useState(initialDispenseLogs);
-  const [refillLogs] = useState(initialRefillLogs);
+  const [refillLogs, setRefillLogs] = useState(initialRefillLogs);
 
   const [showRefillModal, setShowRefillModal] = useState(false);
   const [refillLoading, setRefillLoading] = useState(false);
@@ -92,7 +92,26 @@ export default function CompartmentDetailClient({
     Math.max(0, (currentStock / totalCapacity) * 100)
   );
   const isLowStock = currentStock <= lowThreshold;
-  const progressColor = isLowStock ? "bg-red-500" : "bg-green-500";
+  const progressColor = isLowStock ? "bg-stone-500" : "bg-stone-700";
+  const isAtFullCapacity = currentStock >= totalCapacity;
+
+  function prependRefillLog(log: RefillLog) {
+    setRefillLogs((prev) => {
+      if (prev.some((entry) => entry.id === log.id)) {
+        return prev;
+      }
+      return [log, ...prev].slice(0, 10);
+    });
+  }
+
+  function prependDispenseLog(log: DispenseLog) {
+    setDispenseLogs((prev) => {
+      if (prev.some((entry) => entry.id === log.id)) {
+        return prev;
+      }
+      return [log, ...prev].slice(0, 20);
+    });
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -128,7 +147,20 @@ export default function CompartmentDetailClient({
         },
         (payload) => {
           const newLog = payload.new as DispenseLog;
-          setDispenseLogs((prev) => [newLog, ...prev].slice(0, 20));
+          prependDispenseLog(newLog);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "refill_logs",
+          filter: `compartment_id=eq.${compartment.id}`,
+        },
+        (payload) => {
+          const newLog = payload.new as RefillLog;
+          prependRefillLog(newLog);
         }
       )
       .subscribe();
@@ -154,11 +186,18 @@ export default function CompartmentDetailClient({
         throw new Error(data?.error ?? `Refill failed (${response.status})`);
       }
 
+      const data = await response.json();
+
       setCompartment((prev) => ({
         ...prev,
-        current_stock: totalCapacity,
-        updated_at: new Date().toISOString(),
+        current_stock: data.stock_after,
+        updated_at: data.updated_at ?? new Date().toISOString(),
       }));
+
+      if (data.refill_log) {
+        prependRefillLog(data.refill_log as RefillLog);
+      }
+
       setRefillMessage({ type: "success", text: "Stock refilled successfully." });
       setShowRefillModal(false);
     } catch (err) {
@@ -212,71 +251,51 @@ export default function CompartmentDetailClient({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-shell">
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← Back to Dashboard
+        <Link href="/dashboard" className="link-subtle">
+          ← Back to dashboard
         </Link>
 
         <header className="mt-4">
-          <p className="text-sm font-medium text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
             Slot {compartment.slot_number}
           </p>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
             {compartment.product_name}
           </h1>
         </header>
 
-        {/* Stock Overview */}
-        <section className="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="card mt-8 p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <p className="text-4xl font-bold tracking-tight text-gray-900">
-              {formatStock(currentStock)} kg
-              <span className="text-xl font-medium text-gray-400">
+            <p className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+              {formatStock(currentStock)}
+              <span className="text-lg font-normal text-stone-400"> kg</span>
+              <span className="text-base font-normal text-stone-400">
                 {" "}
                 / {formatStock(totalCapacity)} kg
               </span>
             </p>
             {isLowStock && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                  />
-                </svg>
-                Low Stock
-              </span>
+              <span className="badge-attention shrink-0">Low stock</span>
             )}
           </div>
 
-          <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
             <div
               className={`h-full rounded-full transition-all duration-300 ${progressColor}`}
               style={{ width: `${fillPercent}%` }}
             />
           </div>
 
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-stone-500">
             Last updated <RelativeTime iso={compartment.updated_at} />
           </p>
         </section>
 
-        {/* Refill */}
-        <section className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Refill</h2>
-          <p className="mt-1 text-sm text-gray-500">
+        <section className="card mt-5 p-6">
+          <h2 className="text-base font-semibold text-stone-900">Refill</h2>
+          <p className="mt-1 text-sm text-stone-500">
             Reset stock to full capacity after refilling the compartment.
           </p>
           <button
@@ -285,25 +304,26 @@ export default function CompartmentDetailClient({
               setRefillMessage(null);
               setShowRefillModal(true);
             }}
-            className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={isAtFullCapacity || refillLoading}
+            className="btn-primary mt-4 disabled:cursor-not-allowed"
           >
-            Refill to {formatStock(totalCapacity)}kg
+            Refill to {formatStock(totalCapacity)} kg
           </button>
-          {refillMessage && (
-            <p
-              className={`mt-3 text-sm ${
-                refillMessage.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {refillMessage.text}
+          {isAtFullCapacity && (
+            <p className="mt-2 text-sm text-stone-500">
+              Stock is already at full capacity.
             </p>
+          )}
+          {refillMessage && (
+            <p className="mt-3 text-sm text-stone-600">{refillMessage.text}</p>
           )}
         </section>
 
-        {/* Threshold Editor */}
-        <section className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Low Stock Threshold</h2>
-          <p className="mt-1 text-sm text-gray-500">
+        <section className="card mt-5 p-6">
+          <h2 className="text-base font-semibold text-stone-900">
+            Low stock threshold
+          </h2>
+          <p className="mt-1 text-sm text-stone-500">
             Alert when stock falls at or below this level (kg).
           </p>
 
@@ -316,15 +336,15 @@ export default function CompartmentDetailClient({
                   step="0.1"
                   value={thresholdInput}
                   onChange={(e) => setThresholdInput(e.target.value)}
-                  className="w-28 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="input-field w-28 py-2 text-sm"
                   disabled={thresholdLoading}
                 />
-                <span className="text-sm text-gray-500">kg</span>
+                <span className="text-sm text-stone-500">kg</span>
                 <button
                   type="button"
                   onClick={handleThresholdSave}
                   disabled={thresholdLoading}
-                  className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary px-4 py-2 text-sm"
                 >
                   {thresholdLoading ? "Saving…" : "Save"}
                 </button>
@@ -332,14 +352,14 @@ export default function CompartmentDetailClient({
                   type="button"
                   onClick={handleThresholdCancel}
                   disabled={thresholdLoading}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="btn-secondary px-4 py-2 text-sm"
                 >
                   Cancel
                 </button>
               </>
             ) : (
               <>
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-lg font-semibold text-stone-900">
                   {formatStock(lowThreshold)} kg
                 </span>
                 <button
@@ -348,23 +368,9 @@ export default function CompartmentDetailClient({
                     setThresholdMessage(null);
                     setEditingThreshold(true);
                   }}
-                  className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="btn-secondary px-3 py-1.5 text-sm"
                   aria-label="Edit threshold"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-                    />
-                  </svg>
                   Edit
                 </button>
               </>
@@ -372,54 +378,46 @@ export default function CompartmentDetailClient({
           </div>
 
           {thresholdMessage && (
-            <p
-              className={`mt-3 text-sm ${
-                thresholdMessage.type === "success" ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {thresholdMessage.text}
-            </p>
+            <p className="mt-3 text-sm text-stone-600">{thresholdMessage.text}</p>
           )}
         </section>
 
-        {/* Dispense History */}
-        <section className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Dispense History</h2>
+        <section className="card mt-5 p-6">
+          <h2 className="text-base font-semibold text-stone-900">
+            Dispense history
+          </h2>
           {dispenseLogs.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-500">No dispense activity yet</p>
+            <p className="mt-4 text-sm text-stone-500">No dispense activity yet</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <tr className="border-b border-stone-200">
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
                       Timestamp
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
-                      Amount Dispensed
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
+                      Amount
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
-                      Stock Change
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
+                      Stock change
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {dispenseLogs.map((log, index) => (
-                    <tr
-                      key={log.id}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
+                <tbody className="divide-y divide-stone-100">
+                  {dispenseLogs.map((log) => (
+                    <tr key={log.id}>
                       <td
-                        className="whitespace-nowrap px-4 py-3 text-gray-900"
+                        className="whitespace-nowrap px-3 py-3 text-stone-700"
                         title={formatAbsoluteTime(log.created_at)}
                       >
                         <RelativeTime iso={log.created_at} />
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-900">
+                      <td className="whitespace-nowrap px-3 py-3 text-stone-700">
                         {formatStock(Number(log.amount))} kg
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-900">
-                        {formatStock(Number(log.stock_before))} kg →{" "}
+                      <td className="whitespace-nowrap px-3 py-3 text-stone-700">
+                        {formatStock(Number(log.stock_before))} →{" "}
                         {formatStock(Number(log.stock_after))} kg
                       </td>
                     </tr>
@@ -430,43 +428,41 @@ export default function CompartmentDetailClient({
           )}
         </section>
 
-        {/* Refill History */}
-        <section className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Refill History</h2>
+        <section className="card mt-5 p-6">
+          <h2 className="text-base font-semibold text-stone-900">
+            Refill history
+          </h2>
           {refillLogs.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-500">No refill activity yet</p>
+            <p className="mt-4 text-sm text-stone-500">No refill activity yet</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
+                  <tr className="border-b border-stone-200">
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
                       Timestamp
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
-                      Stock Before Refill
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
+                      Before refill
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">
-                      Refilled To
+                    <th className="px-3 py-3 text-left font-medium text-stone-500">
+                      Refilled to
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {refillLogs.map((log, index) => (
-                    <tr
-                      key={log.id}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
+                <tbody className="divide-y divide-stone-100">
+                  {refillLogs.map((log) => (
+                    <tr key={log.id}>
                       <td
-                        className="whitespace-nowrap px-4 py-3 text-gray-900"
+                        className="whitespace-nowrap px-3 py-3 text-stone-700"
                         title={formatAbsoluteTime(log.created_at)}
                       >
                         <RelativeTime iso={log.created_at} />
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-900">
+                      <td className="whitespace-nowrap px-3 py-3 text-stone-700">
                         {formatStock(Number(log.stock_before))} kg
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-900">
+                      <td className="whitespace-nowrap px-3 py-3 text-stone-700">
                         {formatStock(totalCapacity)} kg
                       </td>
                     </tr>
@@ -478,27 +474,26 @@ export default function CompartmentDetailClient({
         </section>
       </main>
 
-      {/* Refill confirmation modal */}
       {showRefillModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-stone-900/40"
             aria-label="Close modal"
             onClick={() => !refillLoading && setShowRefillModal(false)}
           />
-          <div className="relative w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900">Confirm Refill</h3>
-            <p className="mt-3 text-sm text-gray-600">
+          <div className="card relative w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-stone-900">Confirm refill</h3>
+            <p className="mt-3 text-sm text-stone-600">
               Reset {compartment.product_name} stock from{" "}
-              {formatStock(currentStock)}kg to {formatStock(totalCapacity)}kg?
+              {formatStock(currentStock)} kg to {formatStock(totalCapacity)} kg?
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowRefillModal(false)}
                 disabled={refillLoading}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="btn-secondary"
               >
                 Cancel
               </button>
@@ -506,7 +501,7 @@ export default function CompartmentDetailClient({
                 type="button"
                 onClick={handleRefillConfirm}
                 disabled={refillLoading}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="btn-primary"
               >
                 {refillLoading ? "Refilling…" : "Confirm"}
               </button>

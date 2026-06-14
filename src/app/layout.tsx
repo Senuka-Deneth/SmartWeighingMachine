@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Smart Stock Monitor",
   description: "Maintenance dashboard for smart weighing and dispensing machines",
   manifest: "/manifest.json",
-  themeColor: "#16a34a",
+  themeColor: "#fafaf9",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ServiceWorkerRegister />
         {children}
