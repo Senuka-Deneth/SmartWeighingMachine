@@ -11,6 +11,20 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        border: "var(--border)",
+        surface: "var(--surface)",
+        palette: {
+          primary: "var(--palette-primary)",
+          "primary-hover": "var(--palette-primary-hover)",
+          "primary-light": "var(--palette-primary-light)",
+          success: "var(--palette-success)",
+          "success-light": "var(--palette-success-light)",
+          warning: "var(--palette-warning)",
+          "warning-light": "var(--palette-warning-light)",
+          accent: "var(--palette-accent)",
+          "accent-light": "var(--palette-accent-light)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],

@@ -23,13 +23,16 @@ export default function SignupPage() {
     <div className="page-shell flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="text-sm font-medium text-stone-500 hover:text-stone-700">
+          <Link
+            href="/"
+            className="text-sm font-medium text-palette-primary hover:text-palette-primary-hover"
+          >
             Smart Stock Monitor
           </Link>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-stone-900">
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-foreground">
             Create your account
           </h1>
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-muted">
             Sign up to access the maintenance dashboard
           </p>
         </div>
@@ -37,7 +40,7 @@ export default function SignupPage() {
         <div className="card p-8">
           {state.success ? (
             <div className="space-y-4 text-center">
-              <p className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700">
+              <p className="banner-success px-4 py-3 text-sm text-palette-success">
                 {state.success}
               </p>
               <Link href="/login" className="btn-primary w-full">
@@ -49,7 +52,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-1.5 block text-sm font-medium text-stone-700"
+                  className="mb-1.5 block text-sm font-medium text-muted"
                 >
                   Email
                 </label>
@@ -67,7 +70,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-1.5 block text-sm font-medium text-stone-700"
+                  className="mb-1.5 block text-sm font-medium text-muted"
                 >
                   Password
                 </label>
@@ -86,7 +89,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="mb-1.5 block text-sm font-medium text-stone-700"
+                  className="mb-1.5 block text-sm font-medium text-muted"
                 >
                   Confirm password
                 </label>
@@ -102,7 +105,7 @@ export default function SignupPage() {
               </div>
 
               {state.error && (
-                <p className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700">
+                <p className="banner-warning px-4 py-3 text-sm text-palette-warning">
                   {state.error}
                 </p>
               )}
@@ -111,9 +114,12 @@ export default function SignupPage() {
             </form>
           )}
 
-          <p className="mt-6 text-center text-sm text-stone-500">
+          <p className="mt-6 text-center text-sm text-muted">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-stone-700 hover:text-stone-900">
+            <Link
+              href="/login"
+              className="font-medium text-palette-primary hover:text-palette-primary-hover"
+            >
               Sign in
             </Link>
           </p>

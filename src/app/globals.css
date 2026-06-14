@@ -3,12 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --muted: #78716c;
-  --border: #e7e5e4;
+  --background: #f8f7f4;
+  --foreground: #2c2a26;
+  --muted: #6b6560;
+  --border: #e5e2dc;
   --surface: #ffffff;
-  --accent: #44403c;
+
+  /* Minimal muted palette — soft, not bright or shiny */
+  --palette-primary: #5a7d86;
+  --palette-primary-hover: #4a6b73;
+  --palette-primary-light: #e8f0f2;
+
+  --palette-success: #6d9175;
+  --palette-success-light: #ecf3ee;
+
+  --palette-warning: #b08a5e;
+  --palette-warning-light: #f3ece3;
+
+  --palette-accent: #7d7491;
+  --palette-accent-light: #f0eef3;
 }
 
 body {
@@ -19,39 +32,79 @@ body {
 
 @layer components {
   .page-shell {
-    @apply min-h-screen bg-stone-50 text-stone-900;
+    @apply min-h-screen bg-background text-foreground;
   }
 
   .card {
-    @apply rounded-2xl border border-stone-200 bg-white;
+    @apply rounded-2xl border border-border bg-surface;
   }
 
   .input-field {
-    @apply w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-2.5 text-stone-900 transition-colors placeholder:text-stone-400 focus:border-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-200;
+    @apply w-full rounded-xl border border-border bg-palette-primary-light px-4 py-2.5 text-foreground transition-colors placeholder:text-muted focus:border-palette-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-palette-primary-light;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-stone-50 transition-colors hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-xl bg-palette-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-palette-primary-hover focus:outline-none focus:ring-2 focus:ring-palette-primary-light focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-stone-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-medium text-muted transition-colors hover:border-palette-primary hover:bg-palette-primary-light focus:outline-none focus:ring-2 focus:ring-palette-primary-light focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-palette-primary-light hover:text-palette-primary;
   }
 
   .link-subtle {
-    @apply text-sm font-medium text-stone-600 underline-offset-4 transition-colors hover:text-stone-900 hover:underline;
+    @apply text-sm font-medium text-palette-primary underline-offset-4 transition-colors hover:text-palette-primary-hover hover:underline;
   }
 
-  .badge {
-    @apply inline-flex items-center rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-xs font-medium text-stone-600;
+  .badge-warning {
+    @apply inline-flex items-center rounded-full border border-palette-warning bg-palette-warning-light px-2.5 py-0.5 text-xs font-medium text-palette-warning;
   }
 
-  .badge-attention {
-    @apply inline-flex items-center rounded-full border border-stone-300 bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700;
+  .badge-success {
+    @apply inline-flex items-center rounded-full border border-palette-success bg-palette-success-light px-2.5 py-0.5 text-xs font-medium text-palette-success;
+  }
+
+  .banner-info {
+    @apply rounded-2xl border border-palette-primary bg-palette-primary-light;
+  }
+
+  .banner-success {
+    @apply rounded-2xl border border-palette-success bg-palette-success-light;
+  }
+
+  .banner-warning {
+    @apply rounded-2xl border border-palette-warning bg-palette-warning-light;
+  }
+
+  .progress-track {
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-palette-primary-light;
+  }
+
+  .progress-fill-success {
+    @apply h-full rounded-full bg-palette-success transition-all duration-300;
+  }
+
+  .progress-fill-warning {
+    @apply h-full rounded-full bg-palette-warning transition-all duration-300;
+  }
+
+  .stat-card-primary {
+    @apply card border-palette-primary bg-palette-primary-light;
+  }
+
+  .stat-card-success {
+    @apply card border-palette-success bg-palette-success-light;
+  }
+
+  .stat-card-warning {
+    @apply card border-palette-warning bg-palette-warning-light;
+  }
+
+  .feature-card {
+    @apply card border-l-4 p-6;
   }
 }
 

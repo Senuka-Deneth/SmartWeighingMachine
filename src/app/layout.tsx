@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Smart Stock Monitor",
   description: "Maintenance dashboard for smart weighing and dispensing machines",
   manifest: "/manifest.json",
-  themeColor: "#fafaf9",
+  themeColor: "#5a7d86",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
