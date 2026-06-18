@@ -41,9 +41,11 @@ npm install
    supabase/migrations/001_initial_schema.sql
    supabase/migrations/002_seed_data.sql
    supabase/migrations/003_push_endpoint_unique.sql
+   supabase/migrations/004_realtime_logs_and_replica_identity.sql
+   supabase/migrations/005_reduce_capacity_to_6kg.sql
    ```
 
-   Migration 001 creates tables and RLS policies. Migration 002 seeds machine #1 and four compartments (Rice active, slots 2–4 inactive). Migration 003 adds a unique constraint on push subscription endpoints.
+   Migration 001 creates tables and RLS policies. Migration 002 seeds machine #1 and four compartments (Rice active at 6 kg, slots 2–4 inactive). Migration 003 adds a unique constraint on push subscription endpoints. Migration 004 enables realtime on log tables. Migration 005 sets compartment capacity to 6 kg and low-stock threshold to 1 kg (safe to re-run on fresh installs).
 
 ### Step 3 — Configure environment variables
 
@@ -193,8 +195,8 @@ Each compartment has its own `api_key`. When Slots 2–4 are activated later, qu
   "success": true,
   "compartment_id": "f64d6ada-015a-4534-a92d-4b91c922919e",
   "product_name": "Rice",
-  "stock_before": 25,
-  "stock_after": 24,
+  "stock_before": 6,
+  "stock_after": 5,
   "low_stock_alert": false
 }
 ```
@@ -249,7 +251,7 @@ To activate Slot 2 as "Sugar" (example):
 
 ```sql
 update compartments
-set product_name = 'Sugar', status = 'active', current_stock = 25
+set product_name = 'Sugar', status = 'active', current_stock = 6
 where slot_number = 2
   and machine_id = (select id from machines where machine_number = 1);
 ```
@@ -278,7 +280,7 @@ update compartments set status = 'inactive', product_name = null where slot_numb
 
 ### How it works
 
-1. Each compartment has a `low_stock_threshold` (default 5 kg).
+1. Each compartment has a `low_stock_threshold` (default 1 kg).
 2. When `/api/dispense` reduces stock such that it **crosses from above to at or below** the threshold, `low_stock_alert: true` is returned.
 3. The server asynchronously sends a push notification to all subscribed admins: *"{product} is running low: {X}kg remaining"*.
 4. Notifications use `requireInteraction: true` so they stay visible until dismissed.
