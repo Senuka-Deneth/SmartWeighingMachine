@@ -29,8 +29,8 @@ curl -X POST http://localhost:3000/api/dispense \
   "success": true,
   "compartment_id": "uuid",
   "product_name": "Rice",
-  "stock_before": 25,
-  "stock_after": 24,
+  "stock_before": 6,
+  "stock_after": 5,
   "low_stock_alert": false
 }
 ```
@@ -79,7 +79,7 @@ curl -X POST http://localhost:3000/api/refill \
   "success": true,
   "compartment_id": "uuid",
   "stock_before": 3,
-  "stock_after": 25
+  "stock_after": 6
 }
 ```
 
